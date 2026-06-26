@@ -3,8 +3,7 @@ import httpx
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
 from config import settings
-from hr_policy.service import hr_vector_service  # Natively references the helper module cross-domain
-
+from hr_policy.service import hr_vector_service
 @tool
 async def search_hr_policies(query: str) -> str:
     """Search internal HR policies documents for rules, leaves guidelines, insurance benefits, structure, or procedures."""

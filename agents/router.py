@@ -10,17 +10,25 @@ async def handle_chat_stream(request: Request):
     auth_header = request.headers.get("Authorization", "")
     body = await request.json()
     user_prompt = body.get("content", "")
-    
+
+    session_key = auth_header.replace("Bearer ", "").strip()
+    if not session_key:
+        session_key = "anonymous_fallback_session"
+
     async def sse_generator():
         try:
-            async for chunk in hr_agent_executor.astream(
-                {"input": user_prompt, "chat_history": []},
-                config={"configurable": {"auth_token": auth_header}}
+            async for chunk_msg, metadata in hr_agent_executor.astream(
+                {"messages": [("user", user_prompt)]},
+                config={
+                    "configurable": {
+                        "auth_token": auth_header, 
+                        "thread_id": session_key  
+                    }
+                },
+                stream_mode="messages"
             ):
-                if "messages" in chunk:
-                    for msg in chunk["messages"]:
-                        if hasattr(msg, "content") and msg.content:
-                            yield {"data": json.dumps({"content": msg.content})}
+                if chunk_msg.content and metadata.get("langgraph_node") == "agent":
+                    yield {"data": json.dumps({"content": chunk_msg.content})}
                             
             yield {"data": "[DONE]"}
             
