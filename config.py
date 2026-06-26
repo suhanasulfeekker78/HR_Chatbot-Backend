@@ -1,5 +1,5 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # App Settings
@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     COLLECTION_NAME: str = "hr_policies"
     
     LITELLM_MODEL: str = os.getenv("LITELLM_MODEL", "openai/gpt-4o-mini")
-    LITELLM_API_KEY: str = os.getenv("LITELLM_API_KEY", "your-litellm-key")
+    LITELLM_API_KEY: str = os.getenv("LITELLM_API_KEY", "")
     LITELLM_BASE_URL: str = os.getenv("LITELLM_BASE_URL", "")
     
     GROQ_MODEL: str = "openai/groq/llama-3.3-70b-versatile"
@@ -21,5 +21,7 @@ class Settings(BaseSettings):
     EXTERNAL_DB_BASE_URL: str = "http://localhost:8000"
     # Fallback dummy Bearer token if authorization paths are checked
     EXTERNAL_DB_TOKEN: str = os.getenv("EXTERNAL_DB_TOKEN", "mock-token")
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()
